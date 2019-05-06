@@ -18,6 +18,8 @@ Route.get('meetups/:id/registration', 'RegistrationController.index')
 
 Route.group(() => {
   Route.put('users', 'UserController.update').validator('UserUpdate')
+  Route.get('users', 'UserController.show')
+  Route.get('registered', 'RegistrationController.index')
 
   Route.post('/files', 'FileController.store')
 

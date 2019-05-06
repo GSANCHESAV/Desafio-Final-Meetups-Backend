@@ -8,7 +8,6 @@ class Meetup {
   get rules () {
     return {
       title: 'required',
-      event_date: 'required|date',
       place: 'required',
       category: 'required'
     }

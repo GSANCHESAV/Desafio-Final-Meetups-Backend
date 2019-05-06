@@ -6,9 +6,7 @@ class Registration {
   }
 
   get rules () {
-    return {
-      title: 'required|boolean'
-    }
+    return {}
   }
 }
 

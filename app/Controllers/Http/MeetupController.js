@@ -1,46 +1,38 @@
 'use strict'
 
 const Meetup = use('App/Models/Meetup')
+const Preferences = use('App/Models/Preference')
 
-/** @typedef {import('@adonisjs/framework/src/Request')} Request */
-/** @typedef {import('@adonisjs/framework/src/Response')} Response */
-/** @typedef {import('@adonisjs/framework/src/View')} View */
-
-/**
- * Resourceful controller for interacting with meetups
- */
 class MeetupController {
-  /**
-   * Show a list of all meetups.
-   * GET meetups
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async index ({ request }) {
+  async index ({ request, auth }) {
     const { page } = request.get()
 
+    const userPreferences = await Preferences.findByOrFail(
+      'user_id',
+      auth.user.id
+    )
+
+    const attributes = Object.entries(userPreferences).filter(
+      attr => attr[0] === '$attributes'
+    )
+
+    const meetupObj = attributes[0][1]
+
+    const preferencesName = Object.entries(meetupObj)
+      .filter(pref => pref[1] === true)
+      .map(pref => pref[0])
+
     const meetups = await Meetup.query()
+      .whereIn('category', preferencesName)
       .with('user')
-      .paginate(page)
+      .paginate(page, 6)
 
     return meetups
   }
 
-  /**
-   * Create/save a new meetup.
-   * POST meetups
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
   async store ({ request, auth }) {
     const data = request.only([
       'title',
-      'event_date',
       'place',
       'category',
       'description',
@@ -55,15 +47,6 @@ class MeetupController {
     return meetup
   }
 
-  /**
-   * Display a single meetup.
-   * GET meetups/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
   async show ({ params }) {
     const meetup = await Meetup.findOrFail(params.id)
 
@@ -72,19 +55,10 @@ class MeetupController {
     return meetup
   }
 
-  /**
-   * Update meetup details.
-   * PUT or PATCH meetups/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
   async update ({ params, request }) {
     const meetup = await Meetup.findOrFail(params.id)
     const data = request.only([
       'title',
-      'event_date',
       'place',
       'category',
       'description',
@@ -97,14 +71,6 @@ class MeetupController {
     return meetup
   }
 
-  /**
-   * Delete a meetup with id.
-   * DELETE meetups/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
   async destroy ({ params }) {
     const meetup = await Meetup.findOrFail(params.id)
 

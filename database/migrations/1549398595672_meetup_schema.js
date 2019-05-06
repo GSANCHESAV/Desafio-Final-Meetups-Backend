@@ -15,7 +15,6 @@ class MeetupSchema extends Schema {
         .onUpdate('CASCADE')
         .onDelete('SET NULL')
       table.string('title').notNullable()
-      table.timestamp('event_date').notNullable()
       table.string('place').notNullable()
       table.string('category').notNullable()
       table.text('description')
